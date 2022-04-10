@@ -1,5 +1,7 @@
 import pystk
-
+import numpy as np
+import os
+os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 
 def control(aim_point, current_vel):
     """
@@ -9,6 +11,37 @@ def control(aim_point, current_vel):
     :return: a pystk.Action (set acceleration, brake, steer, drift)
     """
     action = pystk.Action()
+
+    target_velocity = 32
+    steering_factor = 0.3
+
+    x = aim_point[0]
+    y = aim_point[1]
+
+    velocity_ratio = target_velocity / current_vel
+
+    if velocity_ratio > 2:
+        action.nitro = True
+    else:
+        action.nitro = False
+
+    max_acceleration = target_velocity
+    acceleration = target_velocity - current_vel
+    
+    if current_vel > target_velocity:
+        action.brake = True
+    else:
+        action.brake = False
+
+    angle  = (np.arctan(x)) / np.arctan(1)
+
+    action.steer = angle
+    action.acceleration = acceleration / max_acceleration
+
+    if np.abs(angle) > steering_factor:
+        action.drift = True
+    else:
+        action.drift = False
 
     """
     Your code here
