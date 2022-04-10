@@ -25,7 +25,7 @@ def train(args):
 
     import inspect
     transform = eval(args.transform, {k: v for k, v in inspect.getmembers(dense_transforms) if inspect.isclass(v)})
-    train_data = load_data('./drive_data/drive_data', num_workers=4, transform=transform)
+    train_data = load_data('./drive_data', num_workers=4, transform=transform)
 
     det_loss = torch.nn.BCEWithLogitsLoss(reduction='none')
     size_loss = torch.nn.MSELoss(reduction='none')
@@ -34,25 +34,25 @@ def train(args):
     for epoch in range(args.num_epoch):
         model.train()
 
-        for img, gt_det, gt_size in train_data:
-            img, gt_det, gt_size = img.to(device), gt_det.to(device), gt_size.to(device)
+        for img, gt_det in train_data:
+            img, gt_det = img.to(device), gt_det.to(device)
 
-            size_w, _ = gt_det.max(dim=1, keepdim=True)
+            # size_w, _ = gt_det.max(dim=1, keepdim=True)
 
             det = model(img)
             # Continuous version of focal loss
             p_det = torch.sigmoid(det * (1-2*gt_det))
             det_loss_val = (det_loss(det, gt_det)*p_det).mean() / p_det.mean()
-            size_loss_val = (size_w * size_loss(size, gt_size)).mean() / size_w.mean()
-            loss_val = det_loss_val + size_loss_val * args.size_weight
+            # size_loss_val = (size_w * size_loss(size, gt_size)).mean() / size_w.mean()
+            loss_val = det_loss_val
 
             if train_logger is not None and global_step % 100 == 0:
                 log(train_logger, img, gt_det, det, global_step)
 
             if train_logger is not None:
                 train_logger.add_scalar('det_loss', det_loss_val, global_step)
-                train_logger.add_scalar('size_loss', size_loss_val, global_step)
-                train_logger.add_scalar('loss', loss_val, global_step)
+                # train_logger.add_scalar('size_loss', size_loss_val, global_step)
+                # train_logger.add_scalar('loss', loss_val, global_step)
             optimizer.zero_grad()
             loss_val.backward()
             optimizer.step()
