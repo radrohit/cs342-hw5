@@ -85,8 +85,9 @@ class Planner(torch.nn.Module):
             if self.use_skip:
                 z = torch.cat([z, up_activation[i]], dim=1)
         
-        heatmap = self.classifier(z)
-        return spatial_argmax(heatmap[:,0])
+        heatmap = self.classifier(z).mean(dim=[2,3])
+        print(heatmap.shape)
+        return spatial_argmax(heatmap[:,])
 
 
 
