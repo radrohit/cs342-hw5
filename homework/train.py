@@ -40,11 +40,13 @@ def train(args):
             # size_w, _ = gt_det.max(dim=1, keepdim=True)
 
             det = model(img)
-            # Continuous version of focal loss
-            p_det = torch.sigmoid(det * (1-2*gt_det))
-            det_loss_val = (det_loss(det, gt_det)*p_det).mean() / p_det.mean()
-            # size_loss_val = (size_w * size_loss(size, gt_size)).mean() / size_w.mean()
-            loss_val = det_loss_val
+            loss_fn = torch.nn.MSELoss()
+            
+            # # Continuous version of focal loss
+            # p_det = torch.sigmoid(det * (1-2*gt_det))
+            # det_loss_val = (det_loss(det, gt_det)*p_det).mean() / p_det.mean()
+            # # size_loss_val = (size_w * size_loss(size, gt_size)).mean() / size_w.mean()
+            loss_val = loss_fn(det, gt_det)
 
             if train_logger is not None and global_step % 100 == 0:
                 log(train_logger, img, gt_det, det, global_step)
