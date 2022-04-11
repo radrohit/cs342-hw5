@@ -86,7 +86,6 @@ class Planner(torch.nn.Module):
                 z = torch.cat([z, up_activation[i]], dim=1)
         
         heatmap = self.classifier(z).mean(dim=[1])
-        print(heatmap.shape)
         return spatial_argmax(heatmap[:,])
 
 
