@@ -52,7 +52,7 @@ def train(args):
                 log(train_logger, img, gt_det, det, global_step)
 
             if train_logger is not None:
-                train_logger.add_scalar('det_loss', det_loss_val, global_step)
+                train_logger.add_scalar('det_loss', loss_val, global_step)
                 # train_logger.add_scalar('size_loss', size_loss_val, global_step)
                 # train_logger.add_scalar('loss', loss_val, global_step)
             optimizer.zero_grad()
